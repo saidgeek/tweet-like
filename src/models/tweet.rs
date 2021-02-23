@@ -8,7 +8,7 @@ use egg_mode::search::{self, ResultType};
 use serde::{Deserialize, Serialize};
 use regex::Regex;
 use crate::db;
-use crate::models::black_list;
+use crate::config;
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub enum StatusTweet {
@@ -122,8 +122,8 @@ pub fn get_liked() -> Result<HashMap<u64, Tweet>, Box<dyn error::Error>> {
 }
 
 fn to_decide_discard(tweet: &mut Tweet) -> Result<(), Box<dyn error::Error>> {
-  let black_list = black_list::load_black_list()?;
-  let list = black_list.join("|");
+  let config = config::load()?;
+  let list = config.black_list.join("|");
   let re = Regex::new(&list.as_str())?;
 
   if re.is_match(tweet.text.as_str().to_lowercase().trim()) {

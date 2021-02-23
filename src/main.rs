@@ -1,11 +1,13 @@
 
 extern crate serde;
+extern crate serde_yaml;
 extern crate egg_mode;
 extern crate rustbreak;
 extern crate tokio;
 extern crate regex;
 
 mod models;
+mod config;
 mod db;
 mod display;
 
@@ -14,7 +16,7 @@ use std::error;
 const CONSUMER_KEY: &'static str = "***REMOVED***";
 const CONSUMER_SEGRET_KEY: &'static str = "***REMOVED***";
 
-use models::{tweet, user, search_terms};
+use models::{tweet, user};
 
 async fn generate_twitter_credentials(user: &mut user::User) -> Result<(), Box<dyn error::Error>> {
     let consumer_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SEGRET_KEY);
@@ -35,7 +37,7 @@ async fn generate_twitter_credentials(user: &mut user::User) -> Result<(), Box<d
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn error::Error>> {
-    let search_terms = search_terms::load_terms()?;
+    let config = config::load()?;
 
     let mut current_user = user::User::new()?;
 
@@ -45,7 +47,7 @@ async fn main() -> Result<(), Box<dyn error::Error>> {
     }
 
     if let Some(token) = current_user.token {
-        tweet::search(&token, String::from(search_terms.join(" "))).await?;
+        tweet::search(&token, String::from(config.search_terms.join(" "))).await?;
     }
 
     tweet::processing().await?;
