@@ -8,7 +8,7 @@ use egg_mode::search::{self, ResultType};
 use serde::{Deserialize, Serialize};
 use regex::Regex;
 use crate::db;
-use crate::config;
+use crate::config::{self, Config};
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq)]
 pub enum StatusTweet {
@@ -58,10 +58,10 @@ impl Display for Tweet {
     }
 }
 
-pub async fn search(token: &egg_mode::Token, query: String) -> Result<(), Box<dyn error::Error>> {
+pub async fn search(config: Config, token: &egg_mode::Token, query: String) -> Result<(), Box<dyn error::Error>> {
   search::search(query)
     .result_type(ResultType::Recent)
-    .count(5)
+    .count(config.search_count)
     .call(token)
     .await
     .iter()

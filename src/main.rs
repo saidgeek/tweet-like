@@ -10,16 +10,15 @@ mod models;
 mod config;
 mod db;
 mod display;
+mod error;
 
-use std::error;
-
-const CONSUMER_KEY: &'static str = "***REMOVED***";
-const CONSUMER_SEGRET_KEY: &'static str = "***REMOVED***";
+use std::{error::Error};
 
 use models::{tweet, user};
+use config::{Config};
 
-async fn generate_twitter_credentials(user: &mut user::User) -> Result<(), Box<dyn error::Error>> {
-    let consumer_token = egg_mode::KeyPair::new(CONSUMER_KEY, CONSUMER_SEGRET_KEY);
+async fn generate_twitter_credentials(config: Config, user: &mut user::User) -> Result<(), Box<dyn Error>> {
+    let consumer_token = egg_mode::KeyPair::new(config.consumer_key, config.consumer_secret_key);
     let request_token = egg_mode::auth::request_token(&consumer_token, "oob").await?;
     let auth_url = egg_mode::auth::authorize_url(&request_token);
 
@@ -36,18 +35,18 @@ async fn generate_twitter_credentials(user: &mut user::User) -> Result<(), Box<d
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn error::Error>> {
+async fn main() -> Result<(), Box<dyn Error>> {
     let config = config::load()?;
-
     let mut current_user = user::User::new()?;
 
-    if current_user.token.is_none() {
-        generate_twitter_credentials(&mut current_user).await?;
-        current_user.save()?;
-    }
-
-    if let Some(token) = current_user.token {
-        tweet::search(&token, String::from(config.search_terms.join(" "))).await?;
+    match current_user.token().await {
+        Ok(token) => {
+            tweet::search(config.clone(), &token, String::from(config.search_terms.join(" "))).await?;
+        },
+        Err(_e) => {
+            generate_twitter_credentials(config.clone(), &mut current_user).await?;
+            current_user.save()?;
+        },
     }
 
     tweet::processing().await?;
