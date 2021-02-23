@@ -69,6 +69,7 @@ pub async fn search(token: &egg_mode::Token, query: String) -> Result<(), Box<dy
     .for_each(|statuses| {
         statuses
             .iter()
+            .filter(|s| !s.favorited.is_some())
             .for_each(|s| new(&s).save().unwrap())
     });
 
