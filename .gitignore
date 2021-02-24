@@ -1,3 +1,4 @@
 /target
 *.ron
 config.yaml
+.DS_Store

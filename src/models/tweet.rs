@@ -69,7 +69,12 @@ pub async fn search(config: Config, token: &egg_mode::Token, query: String) -> R
     .for_each(|statuses| {
         statuses
             .iter()
-            .filter(|s| !s.favorited.is_some())
+            .filter(|s| {
+              match s.favorited {
+                Some(is_favorited) => !is_favorited,
+                None => true,
+              }
+            })
             .for_each(|s| new(&s).save().unwrap())
     });
 
@@ -146,8 +151,17 @@ async fn to_decide_like(tweet: &mut Tweet) -> Result<(), Box<dyn error::Error>> 
   })?;
 
   if let Some(token) = user.token {
-    egg_mode::tweet::like(tweet.id, &token).await?;
-    tweet.status = StatusTweet::Liked;
+    match egg_mode::tweet::show(tweet.id, &token).await {
+      Ok(t) => {
+        if let Some(is_favorited) =  t.response.favorited{
+          if !is_favorited {
+            egg_mode::tweet::like(tweet.id, &token).await?;
+          }
+          tweet.status = StatusTweet::Liked;
+        }
+      },
+      Err(e) => return Err(Box::new(e)),
+    };
   }
 
   Ok(())
