@@ -7,8 +7,6 @@ use std::path::PathBuf;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub struct Config {
-    pub consumer_key: String,
-    pub consumer_secret_key: String,
     pub search_count: u32,
     pub search_terms: Vec<String>,
     pub black_list: Vec<String>,

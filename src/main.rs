@@ -13,14 +13,12 @@ mod models;
 
 use std::{error::Error, io::Read};
 
-use config::Config;
 use models::{tweet, user};
 
-async fn generate_twitter_credentials(
-    config: Config,
-    user: &mut user::User,
-) -> Result<(), Box<dyn Error>> {
-    let consumer_token = egg_mode::KeyPair::new(config.consumer_key, config.consumer_secret_key);
+include!(concat!(env!("OUT_DIR"), "/secrets.rs"));
+
+async fn generate_twitter_credentials(user: &mut user::User) -> Result<(), Box<dyn Error>> {
+    let consumer_token = egg_mode::KeyPair::new(TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET);
     let request_token = egg_mode::auth::request_token(&consumer_token, "oob").await?;
     let auth_url = egg_mode::auth::authorize_url(&request_token);
 
@@ -66,7 +64,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .await?;
         }
         Err(_e) => {
-            generate_twitter_credentials(config.clone(), &mut current_user).await?;
+            generate_twitter_credentials(&mut current_user).await?;
             current_user.save()?;
         }
     }
@@ -74,7 +72,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     tweet::processing().await?;
 
     display::resume_display()?;
-
     pause();
 
     Ok(())
