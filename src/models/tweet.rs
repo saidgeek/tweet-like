@@ -57,9 +57,14 @@ impl Display for Tweet {
 pub async fn search(
     settings: Settings,
     token: &egg_mode::Token,
-    query: String,
 ) -> Result<(), Box<dyn error::Error>> {
-    search::search(query)
+    let query = settings.search_terms;
+
+    if query.len() <= 0 {
+        return Err("Please added search terms into settings.yaml file.".into());
+    }
+
+    search::search(query.join(" "))
         .result_type(ResultType::Recent)
         .count(settings.search_count)
         .call(token)
@@ -140,8 +145,13 @@ pub fn get_liked() -> Result<HashMap<u64, Tweet>, Box<dyn error::Error>> {
 
 fn to_decide_discard(tweet: &mut Tweet) -> Result<(), Box<dyn error::Error>> {
     let settings = Settings::load()?;
-    let list = settings.black_list.join("|");
-    let re = Regex::new(&list.as_str())?;
+    let list = settings.black_list;
+
+    if list.len() <= 0 {
+        return Err("Please added items to black list into settings.yaml file.".into());
+    }
+
+    let re = Regex::new(&list.join("|").as_str())?;
 
     if re.is_match(tweet.text.as_str().to_lowercase().trim()) {
         tweet.status = StatusTweet::Discarted;

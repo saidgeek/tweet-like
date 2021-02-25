@@ -56,12 +56,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     match current_user.token().await {
         Ok(token) => {
-            tweet::search(
-                settings.clone(),
-                &token,
-                String::from(settings.search_terms.join(" ")),
-            )
-            .await?;
+            tweet::search(settings.clone(), &token).await?;
         }
         Err(_e) => {
             generate_twitter_credentials(&mut current_user).await?;

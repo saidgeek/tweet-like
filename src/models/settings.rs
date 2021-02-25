@@ -6,11 +6,21 @@ use std::{env::current_dir, error};
 use trim_margin::MarginTrimmable;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-#[serde(rename_all = "camelCase", deny_unknown_fields)]
+#[serde(rename_all = "camelCase", default, deny_unknown_fields)]
 pub struct Settings {
     pub search_count: u32,
     pub search_terms: Vec<String>,
     pub black_list: Vec<String>,
+}
+
+impl Default for Settings {
+    fn default() -> Self {
+        Settings {
+            search_count: 25,
+            search_terms: Vec::new(),
+            black_list: Vec::new(),
+        }
+    }
 }
 
 impl Settings {
@@ -31,13 +41,15 @@ impl Settings {
 fn create_settings_file(path: &PathBuf) -> Result<(), Box<dyn error::Error>> {
     let contents = r#"
         |# This field indicate the number of results will.
-        |searchCount: 5
+        |searchCount: 25
         |# This field is a list of the terminus will searching on twitter.
-        |searchTerms:
-        |    - #rustlang
+        |# searchTerms:
+        |#   - term1
+        |#   - term2
         |# This field is a black list of terminus will use for discard tweets.
-        |blackList:
-        |    - lala
+        |# blackList:
+        |#   - term1
+        |#   - term2
     "#;
 
     fs::write(path, contents.trim_margin().unwrap())?;
