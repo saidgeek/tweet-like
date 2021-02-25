@@ -55,13 +55,13 @@ impl Display for Tweet {
 }
 
 pub async fn search(
-    settings: Settings,
     token: &egg_mode::Token,
 ) -> Result<(), Box<dyn error::Error>> {
+    let settings = Settings::load()?;
     let query = settings.search_terms;
 
     if query.len() <= 0 {
-        return Err("Please added search terms into settings.yaml file.".into());
+        warn!("Please added search terms into settings.yaml file.");
     }
 
     search::search(query.join(" "))
@@ -148,7 +148,7 @@ fn to_decide_discard(tweet: &mut Tweet) -> Result<(), Box<dyn error::Error>> {
     let list = settings.black_list;
 
     if list.len() <= 0 {
-        return Err("Please added items to black list into settings.yaml file.".into());
+        warn!("Please added items to black list into settings.yaml file.");
     }
 
     let re = Regex::new(&list.join("|").as_str())?;

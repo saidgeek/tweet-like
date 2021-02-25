@@ -5,15 +5,20 @@ extern crate serde;
 extern crate serde_yaml;
 extern crate tokio;
 extern crate trim_margin;
+#[macro_use] extern crate log;
 
 mod db;
 mod display;
 mod error;
 mod models;
+#[cfg(target_os = "windows")]
+mod pause;
 
-use std::{error::Error, io::Read};
+use std::{error::Error};
+use models::{tweet, user};
+use log::LevelFilter;
+use env_logger::Builder;
 
-use models::{settings::Settings, tweet, user};
 
 include!(concat!(env!("OUT_DIR"), "/secrets.rs"));
 
@@ -35,38 +40,43 @@ async fn generate_twitter_credentials(user: &mut user::User) -> Result<(), Box<d
     Ok(())
 }
 
-use std::io::{stdin, stdout, Write};
-
-fn pause() {
-    let mut stdin = stdin();
-    let mut stdout = stdout();
-
-    // We want the cursor to stay at the end of the line, so we print without a newline and flush manually.
-    write!(stdout, "Press any key to continue...").unwrap();
-    stdout.flush().unwrap();
-
-    // Read a single byte and discard
-    let _ = stdin.read(&mut [0u8]).unwrap();
-}
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let settings = Settings::load()?;
+    let mut log_builder = Builder::new();
+
+    log_builder
+        .filter_level(LevelFilter::Info)
+        .format_timestamp(None)
+        .format_module_path(false);
+
+    let _ = log_builder.try_init();
+
     let mut current_user = user::User::new()?;
 
+    info!("Verified if exists some user initialized.");
     match current_user.token().await {
         Ok(token) => {
-            tweet::search(settings.clone(), &token).await?;
+            info!("Search tweets...");
+            tweet::search(&token).await?;
         }
         Err(_e) => {
+            info!("Please login user!");
             generate_twitter_credentials(&mut current_user).await?;
             current_user.save()?;
+
+            let token = current_user.token().await?;
+            info!("Search tweets...");
+            tweet::search(&token).await?;
         }
     }
 
+    info!("Processing the found tweets");
     tweet::processing().await?;
 
+    info!("Process finished:");
     display::resume_display()?;
+
+    #[cfg(target_os = "windows")]
     pause();
 
     Ok(())
