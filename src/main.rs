@@ -4,8 +4,8 @@ extern crate rustbreak;
 extern crate serde;
 extern crate serde_yaml;
 extern crate tokio;
+extern crate trim_margin;
 
-mod config;
 mod db;
 mod display;
 mod error;
@@ -13,7 +13,7 @@ mod models;
 
 use std::{error::Error, io::Read};
 
-use models::{tweet, user};
+use models::{settings::Settings, tweet, user};
 
 include!(concat!(env!("OUT_DIR"), "/secrets.rs"));
 
@@ -51,15 +51,15 @@ fn pause() {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
-    let config = config::load()?;
+    let settings = Settings::load()?;
     let mut current_user = user::User::new()?;
 
     match current_user.token().await {
         Ok(token) => {
             tweet::search(
-                config.clone(),
+                settings.clone(),
                 &token,
-                String::from(config.search_terms.join(" ")),
+                String::from(settings.search_terms.join(" ")),
             )
             .await?;
         }

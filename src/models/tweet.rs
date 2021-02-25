@@ -1,4 +1,4 @@
-use crate::config::{self, Config};
+use super::settings::Settings;
 use crate::db;
 use egg_mode::search::{self, ResultType};
 use regex::Regex;
@@ -55,13 +55,13 @@ impl Display for Tweet {
 }
 
 pub async fn search(
-    config: Config,
+    settings: Settings,
     token: &egg_mode::Token,
     query: String,
 ) -> Result<(), Box<dyn error::Error>> {
     search::search(query)
         .result_type(ResultType::Recent)
-        .count(config.search_count)
+        .count(settings.search_count)
         .call(token)
         .await
         .iter()
@@ -139,8 +139,8 @@ pub fn get_liked() -> Result<HashMap<u64, Tweet>, Box<dyn error::Error>> {
 }
 
 fn to_decide_discard(tweet: &mut Tweet) -> Result<(), Box<dyn error::Error>> {
-    let config = config::load()?;
-    let list = config.black_list.join("|");
+    let settings = Settings::load()?;
+    let list = settings.black_list.join("|");
     let re = Regex::new(&list.as_str())?;
 
     if re.is_match(tweet.text.as_str().to_lowercase().trim()) {

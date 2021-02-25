@@ -1,5 +1,5 @@
 /target
 *.ron
-config.yaml
+settings.yaml
 .DS_Store
 .env

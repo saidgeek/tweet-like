@@ -12,6 +12,7 @@ serde = { version = "1.0.123", features = ["derive"] }
 serde_yaml = "0.8"
 tokio = "0.2"
 regex = "1"
+trim-margin = "0.1.0"
 
 [build-dependencies]
 dotenv = "0.15.0"
