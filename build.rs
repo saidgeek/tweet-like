@@ -13,8 +13,7 @@ fn main() {
     let contents = format!(
         "
     static TWITTER_CONSUMER_KEY: &'static str = \"{}\";
-    static TWITTER_CONSUMER_SECRET: &'static str = \"{}\";
-    ",
+    static TWITTER_CONSUMER_SECRET: &'static str = \"{}\";",
         twitter_consumer_key, twitter_consumer_secret
     );
 
