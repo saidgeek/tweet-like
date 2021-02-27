@@ -77,7 +77,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     display::resume_display()?;
 
     #[cfg(target_os = "windows")]
-    pause();
+    pause::pause();
 
     Ok(())
 }

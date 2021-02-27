@@ -1,4 +1,4 @@
-use std::io::{stdin, stdout, Write};
+use std::io::{Read, Write, stdin, stdout};
 
 pub fn pause() {
   let mut stdin = stdin();
