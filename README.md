@@ -59,6 +59,23 @@ $ cargo run
 1. Create a release with the following cargo command `cargo build --release --target x86_64-pc-windows-gnu` this will create the execute file with extension `.exe` in `target/x86_64-pc-windows-gnu/release/tweet-like.exe`.
 2. To execute this file you must have a machine whit windows os installed and do double click in the generated file that it's in this route `target/x86_64-pc-windows-gnu/release/tweet-like.exe`.
 
+After pf the first execution the program, you will should set a settings to the search and the filter, this should you on the `settings.yaml` file. Here an example of a configuration:
+
+```yaml
+# This field indicate the number of results will.
+searchCount: 25
+# This field is a list of the terminus will searching on twitter.
+searchTerms:
+  - #rustlang
+# This field is a black list of terminus will use for discard tweets.
+blackList:
+  - java
+```
+
+When you execute the program again, the search will be carried out with this configuration.
+
+What's more of the `settings.yaml` file, be will create an `storage.ron` ([https://github.com/ron-rs/ron](https://github.com/ron-rs/ron)) file that is a database file, what contain the credentials of twitter user and the search results with the status before of the filtered.
+
 ## What missing?
 
 - [ ] Testing
