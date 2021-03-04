@@ -60,10 +60,6 @@ pub async fn search(
     let settings = Settings::load()?;
     let query = settings.search_terms;
 
-    if query.len() <= 0 {
-        warn!("Please added search terms into settings.yaml file.");
-    }
-
     search::search(query.join(" "))
         .result_type(ResultType::Recent)
         .count(settings.search_count)
@@ -146,10 +142,6 @@ pub fn get_liked() -> Result<HashMap<u64, Tweet>, Box<dyn error::Error>> {
 fn to_decide_discard(tweet: &mut Tweet) -> Result<(), Box<dyn error::Error>> {
     let settings = Settings::load()?;
     let list = settings.black_list;
-
-    if list.len() <= 0 {
-        warn!("Please added items to black list into settings.yaml file.");
-    }
 
     let re = Regex::new(&list.join("|").as_str())?;
 

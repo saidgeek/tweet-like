@@ -36,6 +36,14 @@ impl Settings {
 
         Ok(config)
     }
+
+    pub fn is_missing(&self) -> bool {
+        if self.search_terms.as_slice().is_empty() || self.black_list.as_slice().is_empty() {
+            return true;
+        }
+
+        return false;
+    } 
 }
 
 fn create_settings_file(path: &PathBuf) -> Result<(), Box<dyn error::Error>> {

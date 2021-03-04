@@ -18,6 +18,7 @@ use std::{error::Error};
 use models::{tweet, user};
 use log::LevelFilter;
 use env_logger::Builder;
+use crate::models::settings::Settings;
 
 
 include!(concat!(env!("OUT_DIR"), "/secrets.rs"));
@@ -42,6 +43,7 @@ async fn generate_twitter_credentials(user: &mut user::User) -> Result<(), Box<d
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let settings = Settings::load()?;
     let mut log_builder = Builder::new();
 
     log_builder
@@ -70,12 +72,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         }
     }
 
-    info!("Processing the found tweets");
-    tweet::processing().await?;
-
-    info!("Process finished:");
-    display::resume_display()?;
-
+    if settings.is_missing() {
+        warn!("Please edit a settings file for input the search terms and blacklist.");
+    } else {
+        info!("Processing the found tweets");
+        tweet::processing().await?;
+    
+        info!("Process finished:");
+        display::resume_display()?;
+    }
+    
     #[cfg(target_os = "windows")]
     pause::pause();
 
