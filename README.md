@@ -61,5 +61,12 @@ $ cargo run
 
 ## What missing?
 
-- Testing
-- Generating the documentation in the files.
+- [ ] Testing
+- [ ] Generating the documentation in the files.
+- [ ] Bench
+
+---
+
+If you like this and do you want support me, you will be can here
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/V7V43U127)
